@@ -1,2 +1,5 @@
-package: xplex-rig/agent
-import: []
+package: xplex-agent
+import:
+- package: github.com/spf13/viper
+- package: github.com/streadway/amqp
+- package: github.com/gorilla/mux
