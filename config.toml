@@ -1,0 +1,8 @@
+# Server configuration
+[server]
+port = "8086"
+
+# RMQ configutation
+[rmq]
+host = "amqp://guest:guest@localhost:5672"
+secret = "foo"
