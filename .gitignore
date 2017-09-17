@@ -1,0 +1,18 @@
+*~
+\#*\#
+.\#*
+
+# Ignore /data
+/data/
+
+# Ignore /vendor
+/vendor/
+
+# Ignore /bin
+/bin/
+
+# Ignore /config.json
+/config.json
+
+# Ignore compiled xplex-agent binary in root
+/xplex-agent
