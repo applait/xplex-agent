@@ -1,15 +1,11 @@
-*~
-\#*\#
-.\#*
-
 # Ignore /vendor
-/vendor/
+vendor
 
 # Ignore /bin
-/bin/
+bin
 
 # Ignore /config.toml
-/config.toml
+config.toml
 
 # Ignore compiled xplex-agent binary in root
-/xplex-agent
+xplex-agent
