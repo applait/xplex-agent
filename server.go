@@ -24,12 +24,8 @@ func init() {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// HTTP: Router
-	router := mux.NewRouter()
-	router.HandleFunc("/", RootHandler)
-
 	// Rabbitmq: Dial
-	rmqConn, rmqChan := rmqDial()
+	rmqChan := rmqDial()
 
 	// Rabbitmq: Declare exchange - agent-register
 	err := rmqChan.ExchangeDeclare(
@@ -47,7 +43,7 @@ func main() {
 	}
 
 	// Rabbitmq: Declare exchange - agent-register
-	err := rmqChan.ExchangeDeclare(
+	err = rmqChan.ExchangeDeclare(
 		"agent_stream-init", // name of the exchange
 		"direct",            // type
 		true,                // durable
@@ -60,6 +56,12 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error declaring exchange: agent_stream-init", err)
 	}
+
+	// HTTP: Router
+	router := mux.NewRouter()
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		rootHandler(w, r, rmqChan)
+	}).Methods("POST")
 
 	// HTTP: Listener
 	http.ListenAndServe(":"+viper.GetString("server.port"), router)

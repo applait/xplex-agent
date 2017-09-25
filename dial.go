@@ -4,10 +4,9 @@ import (
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"log"
-	"net/http"
 )
 
-func rmqDial() (*amqp.Connection, *amqp.Channel, *amqp.Connection, *amqp.Channel) {
+func rmqDial() *amqp.Channel {
 	// Dial connection with RabbitMQ / central virtualhost
 	rmqConn, err := amqp.Dial(viper.GetString("rmq.host"))
 	if err != nil {
@@ -22,5 +21,5 @@ func rmqDial() (*amqp.Connection, *amqp.Channel, *amqp.Connection, *amqp.Channel
 		log.Fatalln("Error opening channel "+viper.GetString("rmq.host"), err)
 	}
 
-	return rmqConn, rmqChan
+	return rmqChan
 }

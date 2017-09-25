@@ -2,42 +2,37 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/applait/xplex-meta/contract"
+	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"log"
 	"os"
 )
 
-type RmqHandler struct {
-	ExchangeRegister struct {
-		Hostname string `json:"hostname"`
-		Secret   string `json:"secret"`
-	}
+func rmqPublish(rmqChan *amqp.Channel, exchange string, message map[string]string) {
+	var m interface{}
 
-	ExchangeStreamInit struct {
-		StreamName  string `json:"stream_name"`
-		StreamToken string `json:"stream_token"`
-		JWT         string `json:"jwt"`
-	}
-}
-
-func (rmq RmqHandler) Send(rmqChan *amqp.Channel, exchange string, message map[string]string) {
 	switch exchange {
 	case "agent_register":
-		response := q.ExchangeRegister{}
-
 		hostname, _ := os.Hostname()
-		response.Hostname = hostname
-		response.Secret = viper.GetString("rmq.secret")
-	case "agent_stream-init":
-		response := q.ExchangeStreamInit{}
+		m = contract.AgentRegister{
+			Hostname: hostname,
+			Secret:   viper.GetString("rmq.secret"),
+		}
 
-		response.StreamName = message["StreamName"]
-		response.StreamToken = message["StreamToken"]
-		response.JWT = JWT
+	case "agent_stream-init":
+		m = contract.AgentStreamInit{
+			Name:  message["StreamName"],
+			Token: message["StreamToken"],
+			JWT:   JWT,
+		}
+
+	case "default":
+		m = json.RawMessage("")
+
 	}
 
-	// Marshal JSON
-	publishMessage, err := json.Marshal(response)
+	publishMessage, err := json.Marshal(m)
 	if err != nil {
 		log.Println(err)
 	}
@@ -45,6 +40,7 @@ func (rmq RmqHandler) Send(rmqChan *amqp.Channel, exchange string, message map[s
 	// Publish messages to exchange
 	publishErr := rmqChan.Publish(
 		exchange, // Exchange
+		"",       // Key
 		false,    // Mandatory
 		false,    // Immediate
 		amqp.Publishing{
