@@ -3,6 +3,6 @@
 port = "8086"
 
 # RMQ configutation
-[rmq]
-host = "amqp://guest:guest@localhost:5672"
-secret = "foo"
+["elasticsearch"]
+url = "http://localhost:9200"
+index = "telegraf-*"

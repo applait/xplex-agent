@@ -1,10 +1,6 @@
-hash: 29a1403df110df87877dc079ef5c72e7a6d5ff8b39069282d084727459dd4603
-updated: 2017-09-25T09:57:56.911075974+05:30
+hash: 9b5dc5b4a5e9425e7fbf9bc05e82b14981ff9ed309f5bb118b3488240d63ef65
+updated: 2017-09-27T21:37:43.381940003+05:30
 imports:
-- name: github.com/applait/xplex-meta
-  version: f207b6e25a83ef7361e91a03d6770a327224f17a
-  subpackages:
-  - contract
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/gorilla/context
@@ -30,6 +26,8 @@ imports:
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
   version: 16398bac157da96aa88f98a2df640c7f32af1da2
+- name: github.com/pkg/errors
+  version: 2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb
 - name: github.com/spf13/afero
   version: ee1bd8ee15a1306d1f9201acc41ef39cd9f99a1b
   subpackages:
@@ -42,8 +40,6 @@ imports:
   version: 7aff26db30c1be810f9de5038ec5ef96ac41fd7c
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
-- name: github.com/streadway/amqp
-  version: 2cbfe40c9341ad63ba23e53013b3ddc7989d801c
 - name: golang.org/x/sys
   version: 429f518978ab01db8bb6f44b66785088e7fba58b
   subpackages:
@@ -53,6 +49,11 @@ imports:
   subpackages:
   - transform
   - unicode/norm
+- name: gopkg.in/olivere/elastic.v5
+  version: 2a08d39723b7f4df92b96e2dff891a60952714d6
+  subpackages:
+  - config
+  - uritemplates
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports: []
