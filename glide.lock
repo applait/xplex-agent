@@ -1,12 +1,12 @@
-hash: 9b5dc5b4a5e9425e7fbf9bc05e82b14981ff9ed309f5bb118b3488240d63ef65
-updated: 2017-09-27T21:37:43.381940003+05:30
+hash: e755c450df8ea8fea15fd5e74aecddeb9d1062bb37488044e193db9869efec9c
+updated: 2017-10-01T19:28:53.187323922+05:30
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 3f19343c7d9ce75569b952758bd236af94956061
+  version: 24fca303ac6da784b9e8269f724ddeb0b2eea5e7
 - name: github.com/gorilla/schema
   version: 8b1100835db5bbdae88541510f70d114b91a7e4d
 - name: github.com/hashicorp/hcl
@@ -20,14 +20,14 @@ imports:
   - json/parser
   - json/scanner
   - json/token
+- name: github.com/jasonlvhit/gocron
+  version: 42a5804d37aa0b9239b265e894a16b8edbf52d54
 - name: github.com/magiconair/properties
   version: 8d7837e64d3c1ee4e54a880c5a920ab4316fc90a
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
   version: 16398bac157da96aa88f98a2df640c7f32af1da2
-- name: github.com/pkg/errors
-  version: 2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb
 - name: github.com/spf13/afero
   version: ee1bd8ee15a1306d1f9201acc41ef39cd9f99a1b
   subpackages:
@@ -49,11 +49,6 @@ imports:
   subpackages:
   - transform
   - unicode/norm
-- name: gopkg.in/olivere/elastic.v5
-  version: 2a08d39723b7f4df92b96e2dff891a60952714d6
-  subpackages:
-  - config
-  - uritemplates
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports: []

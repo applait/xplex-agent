@@ -1,5 +1,8 @@
 package: xplex-agent
 import:
-- package: github.com/spf13/viper
 - package: github.com/gorilla/mux
-- package: gopkg.in/olivere/elastic.v5
+  version: ~1.5.0
+- package: github.com/gorilla/schema
+- package: github.com/jasonlvhit/gocron
+- package: github.com/spf13/viper
+  version: ~1.0.0
