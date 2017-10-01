@@ -1,8 +1,9 @@
 package rest
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Start bootstraps the REST API
@@ -11,6 +12,7 @@ func Start() *mux.Router {
 
 	r.HandleFunc("/", homeHandler).Methods("GET")
 	callbackHandler(r.PathPrefix("/callback").Subrouter())
+	statsHandler(r.PathPrefix("/stats").Subrouter())
 
 	return r
 }

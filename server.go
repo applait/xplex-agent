@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/spf13/viper"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
-	"xplex-agent/es"
+	"xplex-agent/cron"
 	"xplex-agent/rest"
+
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -23,11 +24,11 @@ func init() {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// Dial elasticseatch
-	es.Dial(
-		viper.GetString("elastic.url"),
-		viper.GetString("elastic.index"),
-	)
+	// Poll Rig on stream status
+	cron.Start()
+
+	// HTTP route handler
+	rest.Start()
 
 	// Agent HTTP interface for Rig and Nginx
 	http.ListenAndServe(":"+viper.GetString("server.port"), rest.Start())

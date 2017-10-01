@@ -1,8 +1,11 @@
-# Server configuration
+# Server
 [server]
 port = "8086"
 
-# RMQ configutation
-["elasticsearch"]
-url = "http://localhost:9200"
-index = "telegraf-*"
+# Telegraf
+[telegraf]
+host = ""
+
+# Rig
+[rig]
+URL =
