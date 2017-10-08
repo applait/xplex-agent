@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
-	"xplex-agent/cron"
-	"xplex-agent/execworker"
-	"xplex-agent/rest"
+	"github.com/applait/xplex-agent/cron"
+	"github.com/applait/xplex-agent/execworker"
+	"github.com/applait/xplex-agent/rest"
 
 	"github.com/spf13/viper"
 )
