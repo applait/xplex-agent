@@ -9,3 +9,7 @@ host = ""
 # Rig
 [rig]
 URL = ""
+
+# Nginx
+[nginx]
+streamConfigBasePath = ""

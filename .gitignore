@@ -1,11 +1,8 @@
-# Ignore /vendor
+# External package imports
 vendor
 
-# Ignore /bin
+# Bin executable
 bin
 
-# Ignore /config.toml
+# Configuration
 config.toml
-
-# Ignore compiled xplex-agent binary in root
-xplex-agent
