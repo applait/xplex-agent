@@ -1,14 +1,32 @@
 package execworker
 
 import (
+	"io/ioutil"
 	"os/exec"
+	"strconv"
+	"syscall"
 )
 
-// SpinNginx starts secondary nginx process for specific stream
-func SpinNginx(streamConfigPath string) (string, error) {
-	out, err := exec.Command("nginx", "-c", streamConfigPath).Output()
+// StartNginx starts secondary nginx process for specific stream
+func StartNginx(configPath string, pidPath string) error {
+	err := exec.Command("nginx", "-c", configPath, "-g", "'pid "+pidPath+";'").Run()
 	if err != nil {
-		return string(out), err
+		return err
 	}
-	return string(out), nil
+
+	return nil
+}
+
+// StopNginx accepts a pidPath and kills the process
+func StopNginx(pidPath string) error {
+	out, err := ioutil.ReadFile(pidPath)
+	if err != nil {
+		return err
+	}
+
+	pid, _ := strconv.Atoi(string(out))
+
+	syscall.Kill(pid, syscall.SIGQUIT)
+
+	return nil
 }

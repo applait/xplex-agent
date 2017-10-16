@@ -98,15 +98,54 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store stream specific secondary nginx configuration
-	out, err := os.Create(viper.GetString("nginx.streamConfigBasePath") + req.Name)
+	configPath := viper.GetString("nginx.sec.configBasePath") + req.Name
+	out, err := os.Create(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer out.Close()
 	io.Copy(out, proxyResp.Body)
 
+	// PID path
+	pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
+
 	// Spin secondary nginx process
-	execworker.SpinNginx(req.Name)
+	startNginxErr := execworker.StartNginx(configPath, pidPath)
+	if startNginxErr != nil {
+		log.Println(err)
+	}
+
+	// Proxy back status code to primary nginx
+	w.WriteHeader(proxyResp.StatusCode)
+}
+
+func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
+	req := new(rtmpPublishReq)
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	decoder := schema.NewDecoder()
+
+	err = decoder.Decode(req, r.PostForm)
+	if err != nil {
+		log.Println(err)
+	}
+
+	proxyResp, err := proxyReq(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// PID path
+	pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
+
+	// Stop secondary nginx process on stream end
+	stopNginxErr := execworker.StopNginx(pidPath)
+	if stopNginxErr != nil {
+		log.Println(err)
+	}
 
 	// Proxy back status code to primary nginx
 	w.WriteHeader(proxyResp.StatusCode)
@@ -115,8 +154,12 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 func rtmpHandler(r *mux.Router) {
 	rpost := r.Methods("POST").Subrouter()
 
+	// Connect start handler. Used for authentication purposes.
 	rpost.HandleFunc("/on_connect", rtmpConnect)
+
+	// Publish start/end callback handlers
 	rpost.HandleFunc("/on_publish", rtmpPublish)
+	rpost.HandleFunc("/on_publish_done", rtmpPublishDone)
 }
 
 func callbackHandler(r *mux.Router) {

@@ -12,4 +12,9 @@ URL = ""
 
 # Nginx
 [nginx]
-streamConfigBasePath = ""
+
+  [nginx.sec]
+  configBasePath = ""
+  pidBasePath = ""
+
+  [nginx.pri]
