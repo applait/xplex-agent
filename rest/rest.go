@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Start bootstraps the REST API
+// Start bootstraps the REST API with root namespace handlers
 func Start() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 

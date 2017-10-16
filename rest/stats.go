@@ -79,6 +79,7 @@ type NginxStats struct {
 	Host string `json:"host"`
 }
 
+// Queries HTTP interface provided by Nginx for stats and returns the response
 func streamHandler(w http.ResponseWriter, r *http.Request) {
 	statsRes, err := http.Get(viper.GetString("nginx.stats.URL"))
 	if err != nil {
