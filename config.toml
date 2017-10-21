@@ -18,3 +18,5 @@ URL = ""
   pidBasePath = ""
 
   [nginx.pri]
+  statsURL = ""
+  controlURL = ""
