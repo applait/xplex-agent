@@ -56,26 +56,26 @@ func proxyReq(req interface{}) (*http.Response, error) {
 }
 
 func rtmpConnect(w http.ResponseWriter, r *http.Request) {
-	req := new(rtmpConnectReq)
-	err := r.ParseForm()
-	if err != nil {
-		log.Println(err)
-	}
+	// req := new(rtmpConnectReq)
+	// err := r.ParseForm()
+	// if err != nil {
+	//	log.Println(err)
+	// }
 
-	decoder := schema.NewDecoder()
+	// decoder := schema.NewDecoder()
 
-	err = decoder.Decode(req, r.PostForm)
-	if err != nil {
-		log.Println(err)
-	}
+	// err = decoder.Decode(req, r.PostForm)
+	// if err != nil {
+	//	log.Println(err)
+	// }
 
-	proxyResp, err := proxyReq(req)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// proxyResp, err := proxyReq(req)
+	// if err != nil {
+	//	log.Fatal(err)
+	// }
 
-	// Proxy back status code to primary nginx
-	w.WriteHeader(proxyResp.StatusCode)
+	// Returning 200 for time being
+	w.WriteHeader(http.StatusOK)
 }
 
 func rtmpPublish(w http.ResponseWriter, r *http.Request) {

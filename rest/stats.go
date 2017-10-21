@@ -79,35 +79,46 @@ type NginxStats struct {
 	Host string `json:"host"`
 }
 
-// Queries HTTP interface provided by Nginx for stats and returns the response
-func streamHandler(w http.ResponseWriter, r *http.Request) {
-	statsRes, err := http.Get(viper.GetString("nginx.stats.URL"))
+// GetNginxRTMPStats returns a JSON formatted RTMP stats by default
+func GetNginxRTMPStats() ([]byte, error) {
+	statsRes, err := http.Get(viper.GetString("nginx.pri.statsURL"))
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 	defer statsRes.Body.Close()
 
 	statsBody, err := ioutil.ReadAll(statsRes.Body)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	nginxStats := new(NginxStats)
 	err = xml.Unmarshal(statsBody, &nginxStats)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	nginxStats.Host, err = os.Hostname()
 
 	nginxStatsJSON, err := json.Marshal(nginxStats)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(nginxStatsJSON)
+	return nginxStatsJSON, nil
+}
+
+// Queries HTTP interface provided by Nginx for stats and returns the response
+func streamHandler(w http.ResponseWriter, r *http.Request) {
+	nginxRTMPStats, err := GetNginxRTMPStats()
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+	} else {
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(nginxRTMPStats)
+	}
 }
 
 func statsHandler(r *mux.Router) {
