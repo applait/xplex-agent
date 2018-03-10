@@ -16,6 +16,7 @@ URL = ""
   [nginx.sec]
   configBasePath = ""
   pidBasePath = ""
+  configStubPath = ""
 
   [nginx.pri]
   statsURL = ""

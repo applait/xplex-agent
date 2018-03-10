@@ -3,7 +3,6 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -36,6 +35,17 @@ type rtmpPublishReq struct {
 	Name     string `schema:"name"`
 }
 
+type StreamEgresses struct {
+	Message string `json:"message"`
+	Payload []struct {
+		ID        int    `json:"id"`
+		Service   string `json:"service"`
+		StreamKey string `json:"streamKey"`
+		RtmpURL   string `json:"rtmpUrl"`
+		IsActive  bool   `json:"isActive"`
+	} `json:"payload"`
+}
+
 func proxyReq(req interface{}) (*http.Response, error) {
 	payload, err := json.Marshal(req)
 	if err != nil {
@@ -56,26 +66,29 @@ func proxyReq(req interface{}) (*http.Response, error) {
 }
 
 func rtmpConnect(w http.ResponseWriter, r *http.Request) {
-	// req := new(rtmpConnectReq)
-	// err := r.ParseForm()
-	// if err != nil {
-	//	log.Println(err)
-	// }
+	req := new(rtmpConnectReq)
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
 
-	// decoder := schema.NewDecoder()
+	decoder := schema.NewDecoder()
 
-	// err = decoder.Decode(req, r.PostForm)
-	// if err != nil {
-	//	log.Println(err)
-	// }
+	err = decoder.Decode(req, r.PostForm)
+	if err != nil {
+		log.Println(err)
+	}
 
-	// proxyResp, err := proxyReq(req)
-	// if err != nil {
-	//	log.Fatal(err)
-	// }
+	proxyResp, err := proxyReq(req)
+	if err != nil {
+		log.Println(err)
+	}
 
-	// Returning 200 for time being
-	w.WriteHeader(http.StatusOK)
+	// Rig currently sends just 200 OK. Using it to log.
+	// That's because nginx-rtmp will not post stream name before on_publish.
+
+	// Proxy back the response status
+	w.WriteHeader(proxyResp.StatusCode)
 }
 
 func rtmpPublish(w http.ResponseWriter, r *http.Request) {
@@ -99,24 +112,41 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 
 	// Store stream specific secondary nginx configuration
 	configPath := viper.GetString("nginx.sec.configBasePath") + req.Name
-	out, err := os.Create(configPath)
+	_, err = os.Create(configPath)
+
+	streamEgresses := StreamEgresses{}
+	err = json.NewDecoder(proxyResp.Body).Decode(&streamEgresses)
+
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer out.Close()
-	io.Copy(out, proxyResp.Body)
-
-	// PID path
-	pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
-
-	// Spin secondary nginx process
-	startNginxErr := execworker.StartNginx(configPath, pidPath)
-	if startNginxErr != nil {
 		log.Println(err)
 	}
 
-	// Proxy back status code to primary nginx
-	w.WriteHeader(proxyResp.StatusCode)
+	defer proxyResp.Body.Close()
+
+	configStubPath := viper.GetString("nginx.sec.configStubPath")
+
+	var streamEgressURLs []string
+	for _, value := range streamEgresses.Payload {
+		streamEgressURLs = append(streamEgressURLs, value.RtmpURL)
+	}
+
+	err = updateSecNginxConf(configPath, configStubPath, streamEgressURLs)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		// PID path
+		pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
+
+		// Spin streamer
+		err = execworker.StartStreamer("nginx", configPath, pidPath)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// Proxy back status code to primary nginx
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
@@ -142,8 +172,8 @@ func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
 	pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
 
 	// Stop secondary nginx process on stream end
-	stopNginxErr := execworker.StopNginx(pidPath)
-	if stopNginxErr != nil {
+	err = execworker.StopStreamer("nginx", pidPath)
+	if err != nil {
 		log.Println(err)
 	}
 
