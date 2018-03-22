@@ -39,18 +39,29 @@ func updateSecNginxConf(configPath string, configStubPath string, destinations [
 		pushBlockBuffer.String(),
 		-1)
 
-	// Get available open port
-	openPort, err := GetFreePort()
+	// Get available open port for HTTP
+	openHTTPPort, err := GetFreePort()
 	if err != nil {
 		return err
 	}
 
 	configFileY := strings.Replace(string(configFileX),
-		"XPLEX_PORT",
-		string(openPort),
+		"XPLEX_HTTP_PORT",
+		string(openHTTPPort),
 		-1)
 
-	err = ioutil.WriteFile(configPath, []byte(configFileY), 0)
+	// Get available open port for RTMP
+	openRTMPPort, err := GetFreePort()
+	if err != nil {
+		return err
+	}
+
+	configFileZ := strings.Replace(string(configFileY),
+		"XPLEX_RTMP_PORT",
+		string(openRTMPPort),
+		-1)
+
+	err = ioutil.WriteFile(configPath, []byte(configFileZ), 0)
 	if err != nil {
 		panic(err)
 	}
