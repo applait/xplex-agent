@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/applait/xplex-agent/execworker"
 	"github.com/gorilla/mux"
@@ -46,6 +47,7 @@ type StreamEgresses struct {
 	} `json:"payload"`
 }
 
+// DISABLED. Will be used in future
 func proxyReq(req interface{}) (*http.Response, error) {
 	payload, err := json.Marshal(req)
 	if err != nil {
@@ -66,29 +68,33 @@ func proxyReq(req interface{}) (*http.Response, error) {
 }
 
 func rtmpConnect(w http.ResponseWriter, r *http.Request) {
-	req := new(rtmpConnectReq)
-	err := r.ParseForm()
-	if err != nil {
-		log.Println(err)
-	}
+	// DISABLED because rig can't handle connect requests
+	// at the moment
+	// req := new(rtmpConnectReq)
+	// err := r.ParseForm()
+	// if err != nil {
+	//	log.Println(err)
+	// }
 
-	decoder := schema.NewDecoder()
+	// decoder := schema.NewDecoder()
 
-	err = decoder.Decode(req, r.PostForm)
-	if err != nil {
-		log.Println(err)
-	}
+	// err = decoder.Decode(req, r.PostForm)
+	// if err != nil {
+	//	log.Println(err)
+	// }
 
-	proxyResp, err := proxyReq(req)
-	if err != nil {
-		log.Println(err)
-	}
+	// proxyResp, err := proxyReq(req)
+	// if err != nil {
+	//	log.Println(err)
+	// }
 
 	// Rig currently sends just 200 OK. Using it to log.
 	// That's because nginx-rtmp will not post stream name before on_publish.
 
 	// Proxy back the response status
-	w.WriteHeader(proxyResp.StatusCode)
+	// w.WriteHeader(proxyResp.StatusCode)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func rtmpPublish(w http.ResponseWriter, r *http.Request) {
@@ -105,23 +111,30 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	proxyResp, err := proxyReq(req)
-	if err != nil {
-		log.Fatal(err)
+	httpClient := &http.Client{
+		Timeout: time.Second * 20,
 	}
+
+	rigReq, _ := http.NewRequest("GET", viper.GetString("rig.URL")+"/"+req.Name, nil)
+
+	rigRes, err := httpClient.Do(rigReq)
+	if err != nil {
+		log.Println(err)
+	}
+	defer rigRes.Body.Close()
 
 	// Store stream specific secondary nginx configuration
 	configPath := viper.GetString("nginx.sec.configBasePath") + req.Name
 	_, err = os.Create(configPath)
 
 	streamEgresses := StreamEgresses{}
-	err = json.NewDecoder(proxyResp.Body).Decode(&streamEgresses)
+	err = json.NewDecoder(rigRes.Body).Decode(&streamEgresses)
 
 	if err != nil {
 		log.Println(err)
 	}
 
-	defer proxyResp.Body.Close()
+	defer rigRes.Body.Close()
 
 	configStubPath := viper.GetString("nginx.sec.configStubPath")
 
@@ -163,10 +176,11 @@ func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	proxyResp, err := proxyReq(req)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// DISABLED. Will be handled when rig enables it
+	// proxyResp, err := proxyReq(req)
+	// if err != nil {
+	//	log.Fatal(err)
+	// }
 
 	// PID path
 	pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
@@ -178,7 +192,7 @@ func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Proxy back status code to primary nginx
-	w.WriteHeader(proxyResp.StatusCode)
+	w.WriteHeader(http.StatusOK)
 }
 
 func rtmpHandler(r *mux.Router) {
