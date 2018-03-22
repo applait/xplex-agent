@@ -5,7 +5,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/applait/xplex-agent/cron"
 	"github.com/applait/xplex-agent/rest"
 
 	"github.com/spf13/viper"
@@ -27,7 +26,8 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	// Cron polls rig every n minutes with current streams info and execute action based on response
-	cron.Start()
+	// DISABLED ATM
+	// cron.Start()
 
 	// Rest defines nginx callback handlers and stats endpoints
 	rest.Start()
