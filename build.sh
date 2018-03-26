@@ -2,27 +2,27 @@
 
 set -e
 
-function cleanRebuild {
+cleanRebuild () {
     rm -rf bin/
     mkdir -p bin/
 }
 
-function buildServerRelease {
+buildServerRelease () {
     echo "Building xplex-agent server release"
     CGO_ENABLED=0 GOOS=linux go build -o bin/xplex-agent -a -ldflags '-extldflags "-static"' .
 }
 
-function buildServerDev {
+buildServerDev () {
     echo "Building xplex-agent server dev"
     go build -o bin/xplex-agent .
 }
 
-function buildDev {
+buildDev () {
     cleanRebuild
     buildServerDev
 }
 
-function buildRelease {
+buildRelease () {
     cleanRebuild
     buildServerRelease
 }
