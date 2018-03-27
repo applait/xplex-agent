@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -31,7 +32,7 @@ func updateSecNginxConf(configPath string, configStubPath string, destinations [
 	var pushBlockBuffer bytes.Buffer
 
 	for _, dst := range destinations {
-		pushBlockBuffer.WriteString("push " + dst + ";")
+		pushBlockBuffer.WriteString("push " + dst + ";\n")
 	}
 
 	configFileX := strings.Replace(string(stubConfigFile),
@@ -41,12 +42,12 @@ func updateSecNginxConf(configPath string, configStubPath string, destinations [
 
 	configFileY := strings.Replace(string(configFileX),
 		"XPLEX_HTTP_PORT",
-		string(openHTTPPort),
+		strconv.Itoa(openHTTPPort),
 		-1)
 
 	configFileZ := strings.Replace(string(configFileY),
 		"XPLEX_RTMP_PORT",
-		string(openRTMPPort),
+		strconv.Itoa(openRTMPPort),
 		-1)
 
 	err = ioutil.WriteFile(configPath, []byte(configFileZ), 0)

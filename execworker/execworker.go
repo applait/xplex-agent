@@ -38,7 +38,7 @@ func StopStreamer(streamer string, pidPath string) error {
 
 // startNginx starts secondary nginx process for specific stream
 func startNginx(configPath string, pidPath string) error {
-	err := exec.Command("nginx", "-c", configPath, "-g", "'pid "+pidPath+";'").Run()
+	err := exec.Command("/usr/local/nginx/sbin/nginx", "-c", configPath, "-g", "'pid "+pidPath+";'").Run()
 	if err != nil {
 		return err
 	}

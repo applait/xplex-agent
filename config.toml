@@ -14,9 +14,9 @@ URL = "https://rig-dev.xplex.online"
 [nginx]
 
   [nginx.sec]
-  configBasePath = "assets/nginx.conf"
+  configBasePath = "/home/xplex/etc/stub"
   pidBasePath = "/home/xplex/etc/pid"
-  configStubPath = "/home/xplex/etc/stub"
+  configStubPath = "assets/nginx.conf"
 
   [nginx.pri]
   statsURL = ""

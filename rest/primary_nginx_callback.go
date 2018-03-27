@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/applait/xplex-agent/execworker"
@@ -105,6 +106,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
 
 	err = decoder.Decode(req, r.PostForm)
 	if err != nil {
@@ -115,7 +117,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		Timeout: time.Second * 20,
 	}
 
-	rigReq, _ := http.NewRequest("GET", viper.GetString("rig.URL")+"/agent/config/"+req.Name, nil)
+	rigReq, _ := http.NewRequest("GET", viper.GetString("rig.URL")+"/agents/config/"+req.Name, nil)
 
 	rigRes, err := httpClient.Do(rigReq)
 	if err != nil {
@@ -124,7 +126,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 	defer rigRes.Body.Close()
 
 	// Store stream specific secondary nginx configuration
-	configPath := viper.GetString("nginx.sec.configBasePath") + req.Name
+	configPath := viper.GetString("nginx.sec.configBasePath") + "/" + req.Name
 	_, err = os.Create(configPath)
 
 	streamEgresses := StreamEgresses{}
@@ -161,7 +163,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		// PID path
-		pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
+		pidPath := viper.GetString("nginx.sec.pidBasePath") + "/" + req.Name
 
 		// Spin streamer
 		err = execworker.StartStreamer("nginx", configPath, pidPath)
@@ -169,7 +171,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 
-		w.Header().Set("Location", "rtmp://127.0.0.1:"+string(openRTMPPort)+"/live/"+req.Name)
+		w.Header().Set("Location", "rtmp://127.0.0.1:"+strconv.Itoa(openRTMPPort)+"/live/"+req.Name)
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	}
 }
@@ -195,7 +197,7 @@ func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// PID path
-	pidPath := viper.GetString("nginx.sec.pidBasePath") + req.Name
+	pidPath := viper.GetString("nginx.sec.pidBasePath") + "/" + req.Name
 
 	// Stop secondary nginx process on stream end
 	err = execworker.StopStreamer("nginx", pidPath)
