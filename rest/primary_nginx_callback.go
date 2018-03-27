@@ -115,7 +115,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		Timeout: time.Second * 20,
 	}
 
-	rigReq, _ := http.NewRequest("GET", viper.GetString("rig.URL")+"/"+req.Name, nil)
+	rigReq, _ := http.NewRequest("GET", viper.GetString("rig.URL")+"/agent/config/"+req.Name, nil)
 
 	rigRes, err := httpClient.Do(rigReq)
 	if err != nil {
@@ -143,7 +143,19 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		streamEgressURLs = append(streamEgressURLs, value.RtmpURL)
 	}
 
-	err = updateSecNginxConf(configPath, configStubPath, streamEgressURLs)
+	// Get available open port for HTTP
+	openHTTPPort, err := GetFreePort()
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Get available open port for HTTP
+	openRTMPPort, err := GetFreePort()
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = updateSecNginxConf(configPath, configStubPath, streamEgressURLs, openHTTPPort, openRTMPPort)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -157,8 +169,8 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 
-		// Proxy back status code to primary nginx
-		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Location", "rtmp://127.0.0.1:"+string(openRTMPPort)+"/live/"+req.Name)
+		w.WriteHeader(http.StatusTemporaryRedirect)
 	}
 }
 

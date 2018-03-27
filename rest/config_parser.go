@@ -21,7 +21,7 @@ func GetFreePort() (int, error) {
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
-func updateSecNginxConf(configPath string, configStubPath string, destinations []string) error {
+func updateSecNginxConf(configPath string, configStubPath string, destinations []string, openHTTPPort int, openRTMPPort int) error {
 	stubConfigFile, err := ioutil.ReadFile(configStubPath)
 	if err != nil {
 		return err
@@ -39,22 +39,10 @@ func updateSecNginxConf(configPath string, configStubPath string, destinations [
 		pushBlockBuffer.String(),
 		-1)
 
-	// Get available open port for HTTP
-	openHTTPPort, err := GetFreePort()
-	if err != nil {
-		return err
-	}
-
 	configFileY := strings.Replace(string(configFileX),
 		"XPLEX_HTTP_PORT",
 		string(openHTTPPort),
 		-1)
-
-	// Get available open port for RTMP
-	openRTMPPort, err := GetFreePort()
-	if err != nil {
-		return err
-	}
 
 	configFileZ := strings.Replace(string(configFileY),
 		"XPLEX_RTMP_PORT",

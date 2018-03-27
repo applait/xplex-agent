@@ -1,6 +1,6 @@
 # Server
 [server]
-port = "8086"
+port = "8081"
 
 # Telegraf
 [telegraf]
@@ -8,15 +8,15 @@ host = ""
 
 # Rig
 [rig]
-URL = ""
+URL = "https://rig-dev.xplex.online"
 
 # Nginx
 [nginx]
 
   [nginx.sec]
-  configBasePath = ""
-  pidBasePath = ""
-  configStubPath = ""
+  configBasePath = "assets/nginx.conf"
+  pidBasePath = "/home/xplex/etc/pid"
+  configStubPath = "/home/xplex/etc/stub"
 
   [nginx.pri]
   statsURL = ""
