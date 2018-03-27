@@ -1,4 +1,0 @@
-package rest
-
-func updateNginxConf() {
-}
