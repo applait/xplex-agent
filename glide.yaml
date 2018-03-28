@@ -6,3 +6,7 @@ import:
 - package: github.com/jasonlvhit/gocron
 - package: github.com/spf13/viper
   version: ~1.0.0
+- package: github.com/coreos/go-systemd
+  version: v16
+  subpackages:
+  - dbus
