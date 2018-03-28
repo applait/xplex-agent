@@ -22,8 +22,8 @@ func GetFreePort() (int, error) {
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
-func updateSecNginxConf(configPath string, configStubPath string, destinations []string, openHTTPPort int, openRTMPPort int) error {
-	stubConfigFile, err := ioutil.ReadFile(configStubPath)
+func updateSecNginxConf(configPath string, nginxConfigStubPath string, destinations []string, openHTTPPort int, openRTMPPort int) error {
+	stubConfigFile, err := ioutil.ReadFile(nginxConfigStubPath)
 	if err != nil {
 		return err
 	}
@@ -51,6 +51,36 @@ func updateSecNginxConf(configPath string, configStubPath string, destinations [
 		-1)
 
 	err = ioutil.WriteFile(configPath, []byte(configFileZ), 0)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+
+}
+
+func updateNginxSystemdConf(configPath string, systemdConfigStubPath string, pidPath string, streamKey string) error {
+	stubConfigFile, err := ioutil.ReadFile(systemdConfigStubPath)
+	if err != nil {
+		return err
+	}
+
+	configFileX := strings.Replace(string(stubConfigFile),
+		"XPLEX_STREAMKEY",
+		streamKey,
+		-1)
+
+	configFileY := strings.Replace(string(configFileX),
+		"XPLEX_CONFIGPATH",
+		configPath,
+		-1)
+
+	configFileZ := strings.Replace(string(configFileY),
+		"XPLEX_PIDPATH",
+		pidPath,
+		-1)
+
+	err = ioutil.WriteFile("/lib/systemd/system/nginx-"+streamKey+".service", []byte(configFileZ), 0)
 	if err != nil {
 		panic(err)
 	}

@@ -2,16 +2,13 @@ package execworker
 
 import (
 	"errors"
-	"io/ioutil"
 	"os/exec"
-	"strconv"
-	"syscall"
 )
 
-func StartStreamer(streamer string, configPath string, pidPath string) error {
+func StartStreamer(streamer string, streamKey string) error {
 	switch streamer {
 	case "nginx":
-		err := startNginx(configPath, pidPath)
+		err := startNginx(streamKey)
 		if err != nil {
 			return nil
 		}
@@ -22,10 +19,10 @@ func StartStreamer(streamer string, configPath string, pidPath string) error {
 	return nil
 }
 
-func StopStreamer(streamer string, pidPath string) error {
+func StopStreamer(streamer string, streamKey string) error {
 	switch streamer {
 	case "nginx":
-		err := stopNginx(pidPath)
+		err := stopNginx(streamKey)
 		if err != nil {
 			return nil
 		}
@@ -37,8 +34,8 @@ func StopStreamer(streamer string, pidPath string) error {
 }
 
 // startNginx starts secondary nginx process for specific stream
-func startNginx(configPath string, pidPath string) error {
-	err := exec.Command("/usr/local/nginx/sbin/nginx", "-c", configPath, "-g", "'pid "+pidPath+";'").Run()
+func startNginx(streamKey string) error {
+	err := exec.Command("systemctl start nginx-" + streamKey).Run()
 	if err != nil {
 		return err
 	}
@@ -47,15 +44,11 @@ func startNginx(configPath string, pidPath string) error {
 }
 
 // stopNginx accepts a pidPath and kills the process
-func stopNginx(pidPath string) error {
-	out, err := ioutil.ReadFile(pidPath)
+func stopNginx(streamKey string) error {
+	err := exec.Command("systemctl stop nginx-" + streamKey).Run()
 	if err != nil {
 		return err
 	}
-
-	pid, _ := strconv.Atoi(string(out))
-
-	syscall.Kill(pid, syscall.SIGQUIT)
 
 	return nil
 }

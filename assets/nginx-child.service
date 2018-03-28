@@ -1,0 +1,11 @@
+[Unit]
+Description=Nginx RTMP child XPLEX_STREAMKEY
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/nginx/sbin/nginx -c XPLEX_CONFIGPATH -g 'pid XPLEX_PIDPATH;'
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

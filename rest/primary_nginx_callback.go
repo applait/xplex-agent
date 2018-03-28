@@ -138,7 +138,8 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 
 	defer rigRes.Body.Close()
 
-	configStubPath := viper.GetString("nginx.sec.configStubPath")
+	nginxConfigStubPath := viper.GetString("nginx.sec.nginxConfigStubPath")
+	systemdConfigStubPath := viper.GetString("nginx.sec.systemdConfigStubPath")
 
 	var streamEgressURLs []string
 	for _, value := range streamEgresses.Payload {
@@ -157,7 +158,7 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	err = updateSecNginxConf(configPath, configStubPath, streamEgressURLs, openHTTPPort, openRTMPPort)
+	err = updateSecNginxConf(configPath, nginxConfigStubPath, streamEgressURLs, openHTTPPort, openRTMPPort)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -165,14 +166,21 @@ func rtmpPublish(w http.ResponseWriter, r *http.Request) {
 		// PID path
 		pidPath := viper.GetString("nginx.sec.pidBasePath") + "/" + req.Name
 
-		// Spin streamer
-		err = execworker.StartStreamer("nginx", configPath, pidPath)
+		err := updateNginxSystemdConf(configPath, systemdConfigStubPath, pidPath, req.Name)
 		if err != nil {
 			log.Println(err)
-		}
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			// Spin streamer
+			err = execworker.StartStreamer("nginx", req.Name)
+			if err != nil {
+				log.Println(err)
+			}
 
-		w.Header().Set("Location", "rtmp://127.0.0.1:"+strconv.Itoa(openRTMPPort)+"/live/"+req.Name)
-		w.WriteHeader(http.StatusTemporaryRedirect)
+			w.Header().Set("Location", "rtmp://127.0.0.1:"+strconv.Itoa(openRTMPPort)+"/live/"+req.Name)
+			w.WriteHeader(http.StatusTemporaryRedirect)
+
+		}
 	}
 }
 
@@ -196,11 +204,8 @@ func rtmpPublishDone(w http.ResponseWriter, r *http.Request) {
 	//	log.Fatal(err)
 	// }
 
-	// PID path
-	pidPath := viper.GetString("nginx.sec.pidBasePath") + "/" + req.Name
-
 	// Stop secondary nginx process on stream end
-	err = execworker.StopStreamer("nginx", pidPath)
+	err = execworker.StopStreamer("nginx", req.Name)
 	if err != nil {
 		log.Println(err)
 	}
