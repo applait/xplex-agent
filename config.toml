@@ -16,7 +16,8 @@ URL = "https://rig-dev.xplex.online"
   [nginx.sec]
   configBasePath = "/home/xplex/etc/stub"
   pidBasePath = "/home/xplex/etc/pid"
-  configStubPath = "assets/nginx.conf"
+  nginxConfigStubPath = "assets/nginx.conf"
+  systemdConfigStubPath = "assets/nginx-child.service"
 
   [nginx.pri]
   statsURL = ""
