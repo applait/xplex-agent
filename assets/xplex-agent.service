@@ -1,0 +1,9 @@
+[Unit]
+Description=Xplex agent service
+After=network.target
+
+[Service]
+Type=simple
+Restart=on-failure
+WorkingDirectory=/home/xplex/bin
+ExecStart=/home/xplex/bin/xplex-agent
